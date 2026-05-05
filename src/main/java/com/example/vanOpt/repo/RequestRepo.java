@@ -1,0 +1,4 @@
+package com.example.vanOpt.repo;
+import com.example.vanOpt.model.OptimizationRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+public interface RequestRepo extends JpaRepository<OptimizationRequest, String> {}

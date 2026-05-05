@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VanOptApplication {
+public class AppJava {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VanOptApplication.class, args);
+		SpringApplication.run(AppJava.class, args);
 	}
 
 }
