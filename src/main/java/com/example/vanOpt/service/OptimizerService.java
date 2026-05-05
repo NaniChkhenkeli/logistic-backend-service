@@ -1,12 +1,11 @@
 package com.example.vanOpt.service;
 
 
-
 import com.example.vanOpt.algorithm.KnapsackSolver;
 import com.example.vanOpt.entity.*;
-import com.example.vanOpt.model.OptimizationRequest;
 import com.example.vanOpt.entity.SelectedShipment;
 import com.example.vanOpt.exception.RequestNotFoundException;
+import com.example.vanOpt.model.OptimizationRequest;
 import com.example.vanOpt.repo.OptimizationRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,19 +52,19 @@ public class OptimizerService {
 
     @Transactional(readOnly = true)
     public OptimizeResponse getById(String requestId) {
-        return repository.findById(requestId)
+        return repository.findByIdWithShipments(requestId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new RequestNotFoundException(requestId));
     }
 
     @Transactional(readOnly = true)
     public List<OptimizeResponse> getAll() {
-        return repository.findAll().stream()
+        return repository.findAllWithShipments().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    // ── Mapping ─────────────────────────────────────────────────────────────
+    // ── Mapping
 
     private OptimizeResponse toResponse(OptimizationRequest entity) {
         List<ShipmentResponse> shipments = entity.getSelectedShipments().stream()

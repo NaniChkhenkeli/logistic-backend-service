@@ -1,32 +1,17 @@
 package com.example.vanOpt.algorithm;
 
-
-
 import com.example.vanOpt.entity.ShipmentRequest;
 import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 0/1 Knapsack solver using dynamic programming.
- *
- * <p>Works with integer volumes and scales decimal revenues to long integers
- * (2 decimal places) to avoid floating-point errors during DP.
- *
- * Time  complexity: O(n * maxVolume)
- * Space complexity: O(n * maxVolume)
- */
+
 @Component
 public class KnapsackSolver {
 
-    private static final int REVENUE_SCALE = 100; // cents precision
+    private static final int REVENUE_SCALE = 100;
 
-    /**
-     * Returns the subset of {@code shipments} that maximises total revenue
-     * without exceeding {@code maxVolume}.
-     */
     public List<ShipmentRequest> solve(int maxVolume, List<ShipmentRequest> shipments) {
         int n = shipments.size();
 
