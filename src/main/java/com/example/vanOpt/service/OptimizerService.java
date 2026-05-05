@@ -1,60 +1,83 @@
 package com.example.vanOpt.service;
 
+
+
+import com.example.vanOpt.algorithm.KnapsackSolver;
+import com.example.vanOpt.entity.*;
 import com.example.vanOpt.model.OptimizationRequest;
-import com.example.vanOpt.model.Shipment;
-import com.example.vanOpt.repo.RequestRepo;
+import com.example.vanOpt.entity.SelectedShipment;
+import com.example.vanOpt.exception.RequestNotFoundException;
+import com.example.vanOpt.repo.OptimizationRequestRepository;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.*;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OptimizerService {
-    private final RequestRepo repo;
 
-    public OptimizerService(RequestRepo repo) {
-        this.repo = repo;
+    private final KnapsackSolver solver;
+    private final OptimizationRequestRepository repository;
+
+    public OptimizerService(KnapsackSolver solver, OptimizationRequestRepository repository) {
+        this.solver = solver;
+        this.repository = repository;
     }
 
-    public Map<String, Object> optimize(int maxVol, List<Shipment> items) {
-        int n = items.size();
-        int[][] dp = new int[n + 1][maxVol + 1];
+    @Transactional
+    public OptimizeResponse optimize(OptimizeRequest request) {
+        List<ShipmentRequest> selected = solver.solve(request.maxVolume(), request.availableShipments());
 
-        for (int i = 1; i <= n; i++) {
-            for (int v = 0; v <= maxVol; v++) {
-                if (items.get(i - 1).volume() <= v) {
-                    dp[i][v] = Math.max(dp[i - 1][v], dp[i - 1][v - items.get(i - 1).volume()] + items.get(i - 1).revenue());
-                } else {
-                    dp[i][v] = dp[i - 1][v];
-                }
-            }
-        }
-
-        List<Shipment> selected = new ArrayList<>();
-        int res = dp[n][maxVol];
-        int v = maxVol;
-        for (int i = n; i > 0 && res > 0; i--) {
-            if (res != dp[i - 1][v]) {
-                Shipment s = items.get(i - 1);
-                selected.add(s);
-                res -= s.revenue();
-                v -= s.volume();
-            }
-        }
+        int totalVolume = selected.stream().mapToInt(ShipmentRequest::volume).sum();
+        BigDecimal totalRevenue = selected.stream()
+                .map(ShipmentRequest::revenue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         OptimizationRequest entity = new OptimizationRequest();
-        entity.setRequestId(UUID.randomUUID().toString());
-        entity.setTotalVolume(maxVol - v);
-        entity.setTotalRevenue(dp[n][maxVol]);
-        entity.setCreatedAt(LocalDateTime.now());
-        entity.setSelectedItems(selected.stream().map(Shipment::name).toList());
-        repo.save(entity);
+        entity.setId(UUID.randomUUID().toString());
+        entity.setMaxVolume(request.maxVolume());
+        entity.setTotalVolume(totalVolume);
+        entity.setTotalRevenue(totalRevenue);
+        entity.setCreatedAt(Instant.now());
 
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("requestId", entity.getRequestId());
-        response.put("selectedShipments", selected);
-        response.put("totalVolume", entity.getTotalVolume());
-        response.put("totalRevenue", entity.getTotalRevenue());
-        response.put("createdAt", entity.getCreatedAt());
-        return response;
+        for (ShipmentRequest s : selected) {
+            entity.addShipment(new SelectedShipment(s.name(), s.volume(), s.revenue()));
+        }
+
+        repository.save(entity);
+        return toResponse(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public OptimizeResponse getById(String requestId) {
+        return repository.findById(requestId)
+                .map(this::toResponse)
+                .orElseThrow(() -> new RequestNotFoundException(requestId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<OptimizeResponse> getAll() {
+        return repository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // ── Mapping ─────────────────────────────────────────────────────────────
+
+    private OptimizeResponse toResponse(OptimizationRequest entity) {
+        List<ShipmentResponse> shipments = entity.getSelectedShipments().stream()
+                .map(s -> new ShipmentResponse(s.getName(), s.getVolume(), s.getRevenue()))
+                .toList();
+
+        return new OptimizeResponse(
+                entity.getId(),
+                shipments,
+                entity.getTotalVolume(),
+                entity.getTotalRevenue(),
+                entity.getCreatedAt()
+        );
     }
 }
