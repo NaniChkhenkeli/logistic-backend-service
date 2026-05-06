@@ -98,6 +98,40 @@ class OptimizerControllerIntegrationTest {
     }
 
     @Test
+    void postOptimize_shouldReturn400WhenRevenueIsNegative() throws Exception {
+        String body = """
+        {
+          "maxVolume": 10,
+          "availableShipments": [
+            { "name": "Bad Item", "volume": 5, "revenue": -100 }
+          ]
+        }
+        """;
+
+        mockMvc.perform(post("/api/optimize")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void postOptimize_shouldReturn400WhenVolumeIsZero() throws Exception {
+        String body = """
+        {
+          "maxVolume": 10,
+          "availableShipments": [
+            { "name": "Air", "volume": 0, "revenue": 100 }
+          ]
+        }
+        """;
+
+        mockMvc.perform(post("/api/optimize")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getAll_shouldReturnPersistedRequests() throws Exception {
         String body = """
             {
