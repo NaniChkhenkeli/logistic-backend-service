@@ -1,9 +1,10 @@
 package com.example.vanOpt.model;
 
-
 import com.example.vanOpt.entity.SelectedShipment;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.List;
 public class OptimizationRequest {
 
     @Id
-    @Column(length = 36)
+    @JdbcTypeCode(Types.VARCHAR) // აკავშირებს String-ს ბაზის UUID-თან
+    @Column(columnDefinition = "uuid")
     private String id;
 
     @Column(name = "max_volume", nullable = false)
@@ -50,9 +52,7 @@ public class OptimizationRequest {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
     public List<SelectedShipment> getSelectedShipments() { return selectedShipments; }
-    public void setSelectedShipments(List<SelectedShipment> selectedShipments) {
-        this.selectedShipments = selectedShipments;
-    }
+    public void setSelectedShipments(List<SelectedShipment> selectedShipments) { this.selectedShipments = selectedShipments; }
 
     public void addShipment(SelectedShipment shipment) {
         shipment.setRequest(this);

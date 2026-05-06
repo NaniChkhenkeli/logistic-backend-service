@@ -1,0 +1,40 @@
+POST http://localhost:8080/api/shipments/optimize
+Content-Type: application/json
+
+{
+  "maxVolume": 100,
+  "items": [
+    {
+      "name": "Laptop",
+      "volume": 20,
+      "revenue": 2000
+    },
+    {
+      "name": "Monitor",
+      "volume": 50,
+      "revenue": 800
+    },
+    {
+      "name": "Keyboard",
+      "volume": 10,
+      "revenue": 150
+    },
+    {
+      "name": "Office Chair",
+      "volume": 70,
+      "revenue": 1200
+    }
+  ]
+}
+
+###
+
+
+GET http://localhost:8080/api/shipments/history
+Accept: application/json
+
+###
+
+
+GET http://localhost:8080/api/shipments/history/550e8400-e29b-41d4-a716-446655440000
+Accept: application/json
