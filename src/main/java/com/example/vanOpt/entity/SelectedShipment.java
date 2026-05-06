@@ -34,12 +34,16 @@ public class SelectedShipment {
     }
 
     public Long getId() { return id; }
+
     public OptimizationRequest getRequest() { return request; }
     public void setRequest(OptimizationRequest request) { this.request = request; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
     public int getVolume() { return volume; }
     public void setVolume(int volume) { this.volume = volume; }
+
     public BigDecimal getRevenue() { return revenue; }
     public void setRevenue(BigDecimal revenue) { this.revenue = revenue; }
 }

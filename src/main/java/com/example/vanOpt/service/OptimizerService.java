@@ -1,6 +1,5 @@
 package com.example.vanOpt.service;
 
-
 import com.example.vanOpt.algorithm.KnapsackSolver;
 import com.example.vanOpt.entity.*;
 import com.example.vanOpt.entity.SelectedShipment;
@@ -36,7 +35,7 @@ public class OptimizerService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         OptimizationRequest entity = new OptimizationRequest();
-        entity.setId(UUID.randomUUID().toString());
+        entity.setId(UUID.randomUUID());
         entity.setMaxVolume(request.maxVolume());
         entity.setTotalVolume(totalVolume);
         entity.setTotalRevenue(totalRevenue);
@@ -52,7 +51,14 @@ public class OptimizerService {
 
     @Transactional(readOnly = true)
     public OptimizeResponse getById(String requestId) {
-        return repository.findByIdWithShipments(requestId)
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(requestId);
+        } catch (IllegalArgumentException e) {
+            // A malformed UUID can never match any stored record → 404
+            throw new RequestNotFoundException(requestId);
+        }
+        return repository.findByIdWithShipments(uuid)
                 .map(this::toResponse)
                 .orElseThrow(() -> new RequestNotFoundException(requestId));
     }
@@ -64,7 +70,7 @@ public class OptimizerService {
                 .toList();
     }
 
-    // ── Mapping
+
 
     private OptimizeResponse toResponse(OptimizationRequest entity) {
         List<ShipmentResponse> shipments = entity.getSelectedShipments().stream()
@@ -72,7 +78,7 @@ public class OptimizerService {
                 .toList();
 
         return new OptimizeResponse(
-                entity.getId(),
+                entity.getId().toString(),
                 shipments,
                 entity.getTotalVolume(),
                 entity.getTotalRevenue(),
