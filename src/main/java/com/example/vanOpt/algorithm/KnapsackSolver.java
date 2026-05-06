@@ -2,20 +2,20 @@ package com.example.vanOpt.algorithm;
 
 import com.example.vanOpt.entity.ShipmentRequest;
 import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Component
 public class KnapsackSolver {
 
     private static final int REVENUE_SCALE = 100;
 
+
     public List<ShipmentRequest> solve(int maxVolume, List<ShipmentRequest> shipments) {
         int n = shipments.size();
 
-        // Scale revenues to longs to avoid BigDecimal comparisons inside the DP loop
         long[] rev = new long[n];
         for (int i = 0; i < n; i++) {
             rev[i] = shipments.get(i).revenue()
@@ -23,7 +23,6 @@ public class KnapsackSolver {
                     .longValue();
         }
 
-        // dp[i][v] = maximum scaled revenue using first i items with capacity v
         long[][] dp = new long[n + 1][maxVolume + 1];
 
         for (int i = 1; i <= n; i++) {
@@ -39,14 +38,13 @@ public class KnapsackSolver {
             }
         }
 
-        // Backtrack to find which items were selected
         List<ShipmentRequest> selected = new ArrayList<>();
-        int remainingVolume = maxVolume;
+        int remaining = maxVolume;
         for (int i = n; i > 0; i--) {
-            if (dp[i][remainingVolume] != dp[i - 1][remainingVolume]) {
+            if (dp[i][remaining] != dp[i - 1][remaining]) {
                 ShipmentRequest s = shipments.get(i - 1);
                 selected.add(s);
-                remainingVolume -= s.volume();
+                remaining -= s.volume();
             }
         }
 

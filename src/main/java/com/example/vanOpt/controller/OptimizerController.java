@@ -6,7 +6,9 @@ import com.example.vanOpt.service.OptimizerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/optimize")
@@ -29,7 +31,7 @@ public class OptimizerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OptimizeResponse> getById(@PathVariable String id) {
+    public ResponseEntity<OptimizeResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));
     }
 }

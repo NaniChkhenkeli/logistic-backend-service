@@ -1,6 +1,5 @@
 package com.example.vanOpt.entity;
 
-
 import java.time.Instant;
 import java.util.List;
 

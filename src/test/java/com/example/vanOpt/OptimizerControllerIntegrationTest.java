@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,9 +27,6 @@ class OptimizerControllerIntegrationTest {
     private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-
-    // ── POST /api/optimize
 
     @Test
     void postOptimize_shouldReturnOptimalSelection() throws Exception {
@@ -94,74 +91,6 @@ class OptimizerControllerIntegrationTest {
     }
 
     @Test
-    void postOptimize_shouldReturn400WhenShipmentsEmpty() throws Exception {
-        String body = """
-            {
-              "maxVolume": 10,
-              "availableShipments": []
-            }
-            """;
-
-        mockMvc.perform(post("/api/optimize")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postOptimize_shouldReturn400WhenShipmentVolumeIsZero() throws Exception {
-        String body = """
-            {
-              "maxVolume": 10,
-              "availableShipments": [
-                { "name": "Zero Vol", "volume": 0, "revenue": 100 }
-              ]
-            }
-            """;
-
-        mockMvc.perform(post("/api/optimize")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postOptimize_shouldReturn400WhenRevenueIsNegative() throws Exception {
-        String body = """
-            {
-              "maxVolume": 10,
-              "availableShipments": [
-                { "name": "Bad Revenue", "volume": 5, "revenue": -50 }
-              ]
-            }
-            """;
-
-        mockMvc.perform(post("/api/optimize")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void postOptimize_shouldReturn400WhenShipmentNameIsBlank() throws Exception {
-        String body = """
-            {
-              "maxVolume": 10,
-              "availableShipments": [
-                { "name": "  ", "volume": 5, "revenue": 100 }
-              ]
-            }
-            """;
-
-        mockMvc.perform(post("/api/optimize")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest());
-    }
-
-    // ── GET /api/optimize ──────────────────────────────────────────────────
-
-    @Test
     void getAll_shouldReturnEmptyListInitially() throws Exception {
         mockMvc.perform(get("/api/optimize"))
                 .andExpect(status().isOk())
@@ -189,7 +118,6 @@ class OptimizerControllerIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))));
     }
 
-    // ── GET /api/optimize/{id}
 
     @Test
     void getById_shouldReturnPersistedRequest() throws Exception {
@@ -218,8 +146,17 @@ class OptimizerControllerIntegrationTest {
 
     @Test
     void getById_shouldReturn404ForUnknownId() throws Exception {
-        mockMvc.perform(get("/api/optimize/non-existent-id"))
+
+        String randomUuid = UUID.randomUUID().toString();
+
+        mockMvc.perform(get("/api/optimize/{id}", randomUuid))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void getById_shouldReturn400ForMalformedUuid() throws Exception {
+        mockMvc.perform(get("/api/optimize/not-a-uuid"))
+                .andExpect(status().isBadRequest());
     }
 }

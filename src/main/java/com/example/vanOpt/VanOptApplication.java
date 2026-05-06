@@ -1,4 +1,3 @@
-
 package com.example.vanOpt;
 
 import org.springframework.boot.SpringApplication;

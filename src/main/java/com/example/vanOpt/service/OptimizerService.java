@@ -2,9 +2,9 @@ package com.example.vanOpt.service;
 
 import com.example.vanOpt.algorithm.KnapsackSolver;
 import com.example.vanOpt.entity.*;
-import com.example.vanOpt.entity.SelectedShipment;
 import com.example.vanOpt.exception.RequestNotFoundException;
 import com.example.vanOpt.model.OptimizationRequest;
+import com.example.vanOpt.entity.SelectedShipment;
 import com.example.vanOpt.repo.OptimizationRequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +27,7 @@ public class OptimizerService {
 
     @Transactional
     public OptimizeResponse optimize(OptimizeRequest request) {
+        // ალგორითმის გამოძახება საუკეთესო კომბინაციის საპოვნელად
         List<ShipmentRequest> selected = solver.solve(request.maxVolume(), request.availableShipments());
 
         int totalVolume = selected.stream().mapToInt(ShipmentRequest::volume).sum();
@@ -34,6 +35,7 @@ public class OptimizerService {
                 .map(ShipmentRequest::revenue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // Entity-ს მომზადება შესანახად
         OptimizationRequest entity = new OptimizationRequest();
         entity.setId(UUID.randomUUID());
         entity.setMaxVolume(request.maxVolume());
@@ -41,26 +43,22 @@ public class OptimizerService {
         entity.setTotalRevenue(totalRevenue);
         entity.setCreatedAt(Instant.now());
 
+        // შერჩეული ტვირთების დაკავშირება ძირითად მოთხოვნასთან
         for (ShipmentRequest s : selected) {
             entity.addShipment(new SelectedShipment(s.name(), s.volume(), s.revenue()));
         }
 
-        repository.save(entity);
-        return toResponse(entity);
+        // მონაცემთა ბაზაში შენახვა
+        OptimizationRequest savedEntity = repository.save(entity);
+        return toResponse(savedEntity);
     }
 
     @Transactional(readOnly = true)
-    public OptimizeResponse getById(String requestId) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(requestId);
-        } catch (IllegalArgumentException e) {
-            // A malformed UUID can never match any stored record → 404
-            throw new RequestNotFoundException(requestId);
-        }
-        return repository.findByIdWithShipments(uuid)
+    public OptimizeResponse getById(UUID id) {
+        // id უკვე არის UUID ტიპის, რაც გამორიცხავს SQL შეცდომას
+        return repository.findByIdWithShipments(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new RequestNotFoundException(requestId));
+                .orElseThrow(() -> new RequestNotFoundException(id.toString()));
     }
 
     @Transactional(readOnly = true)
@@ -70,8 +68,9 @@ public class OptimizerService {
                 .toList();
     }
 
-
-
+    /**
+     * გარდაქმნის მონაცემთა ბაზის ობიექტს (Entity) საპასუხო DTO-დ
+     */
     private OptimizeResponse toResponse(OptimizationRequest entity) {
         List<ShipmentResponse> shipments = entity.getSelectedShipments().stream()
                 .map(s -> new ShipmentResponse(s.getName(), s.getVolume(), s.getRevenue()))

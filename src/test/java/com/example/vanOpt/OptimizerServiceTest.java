@@ -1,6 +1,5 @@
 package com.example.vanOpt;
 
-
 import com.example.vanOpt.algorithm.KnapsackSolver;
 import com.example.vanOpt.entity.*;
 import com.example.vanOpt.model.OptimizationRequest;
@@ -19,6 +18,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +49,7 @@ class OptimizerServiceTest {
         OptimizeRequest request = new OptimizeRequest(15, List.of(sr("A", 5, 120), sr("B", 10, 200)));
         List<ShipmentRequest> solverResult = List.of(sr("A", 5, 120), sr("B", 10, 200));
 
-        when(solver.solve(15, request.availableShipments())).thenReturn(solverResult);
+        when(solver.solve(eq(15), any())).thenReturn(solverResult);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         OptimizeResponse response = service.optimize(request);
@@ -65,7 +65,7 @@ class OptimizerServiceTest {
     @Test
     void optimize_shouldPersistWithCorrectMaxVolume() {
         OptimizeRequest request = new OptimizeRequest(20, List.of(sr("X", 5, 50)));
-        when(solver.solve(any(Integer.class), any())).thenReturn(List.of());
+        when(solver.solve(anyInt(), any())).thenReturn(List.of());
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.optimize(request);
@@ -78,7 +78,7 @@ class OptimizerServiceTest {
     @Test
     void optimize_shouldReturnEmptyListWhenNothingFits() {
         OptimizeRequest request = new OptimizeRequest(1, List.of(sr("Huge", 100, 999)));
-        when(solver.solve(any(Integer.class), any())).thenReturn(List.of());
+        when(solver.solve(anyInt(), any())).thenReturn(List.of());
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         OptimizeResponse response = service.optimize(request);
@@ -90,36 +90,45 @@ class OptimizerServiceTest {
 
     @Test
     void getById_shouldReturnExistingRequest() {
-        OptimizationRequest entity = buildEntity("test-id", 10, 200.0);
-        when(repository.findById("test-id")).thenReturn(Optional.of(entity));
+        UUID randomId = UUID.randomUUID();
+        OptimizationRequest entity = buildEntity(randomId, 10, 200.0);
 
-        OptimizeResponse response = service.getById("test-id");
+        // ვიყენებთ findByIdWithShipments, რადგან სერვისი ამ მეთოდს იძახებს
+        when(repository.findByIdWithShipments(randomId)).thenReturn(Optional.of(entity));
 
-        assertThat(response.requestId()).isEqualTo("test-id");
+        OptimizeResponse response = service.getById(randomId);
+
+        assertThat(response.requestId()).isEqualTo(randomId.toString());
     }
 
     @Test
     void getById_shouldThrowWhenNotFound() {
-        when(repository.findById("missing")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.getById("missing"))
+        UUID missingId = UUID.randomUUID();
+        when(repository.findByIdWithShipments(missingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getById(missingId))
                 .isInstanceOf(RequestNotFoundException.class)
-                .hasMessageContaining("missing");
+                .hasMessageContaining(missingId.toString());
     }
 
     @Test
     void getAll_shouldReturnMappedList() {
-        when(repository.findAll()).thenReturn(List.of(
-                buildEntity("id1", 5, 100.0),
-                buildEntity("id2", 10, 200.0)
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        when(repository.findAllWithShipments()).thenReturn(List.of(
+                buildEntity(id1, 5, 100.0),
+                buildEntity(id2, 10, 200.0)
         ));
 
         List<OptimizeResponse> all = service.getAll();
 
         assertThat(all).hasSize(2);
-        assertThat(all).extracting(OptimizeResponse::requestId).containsExactly("id1", "id2");
+        assertThat(all).extracting(OptimizeResponse::requestId)
+                .containsExactlyInAnyOrder(id1.toString(), id2.toString());
     }
 
-    private OptimizationRequest buildEntity(String id, int volume, double revenue) {
+    private OptimizationRequest buildEntity(UUID id, int volume, double revenue) {
         OptimizationRequest e = new OptimizationRequest();
         e.setId(id);
         e.setMaxVolume(volume + 5);
