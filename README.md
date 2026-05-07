@@ -190,6 +190,4 @@ The API utilizes a `GlobalExceptionHandler` to provide standardized and user-fri
 - PostgreSQL/MySQL support
 - Swagger/OpenAPI documentation
 - Authentication & authorization
-- Docker containerization
-- Shipment prioritization rules
 - Multi-vehicle optimization
