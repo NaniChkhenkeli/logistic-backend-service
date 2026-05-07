@@ -21,7 +21,7 @@ It uses a 0/1 Knapsack Algorithm to determine the most profitable combination of
 - **Comprehensive Error Handling**  
   Standardized JSON error responses for validation failures, malformed requests, and missing resources.
 
----
+
 
 # Tech Stack
 
@@ -30,7 +30,7 @@ It uses a 0/1 Knapsack Algorithm to determine the most profitable combination of
 - **Database:** H2 (In-memory for development/testing)
 - **Testing:** JUnit 5, Mockito, AssertJ, MockMvc
 
----
+
 
 # API Documentation
 
@@ -69,7 +69,7 @@ POST /api/optimize
 }
 ```
 
----
+
 
 ## 2. List History
 
@@ -81,7 +81,7 @@ Retrieve all past optimization results, ordered by the most recent.
 GET /api/optimize
 ```
 
----
+
 
 ## 3. Get Specific Result
 
@@ -93,7 +93,7 @@ Retrieve a specific optimization result by its UUID.
 GET /api/optimize/{id}
 ```
 
----
+
 
 # How It Works
 
@@ -117,7 +117,7 @@ Where:
 - `v` represents the remaining volume capacity
 - `dp[i][v]` stores the maximum achievable revenue
 
----
+
 
 # Getting Started
 
@@ -126,7 +126,7 @@ Where:
 - JDK 21
 - Gradle (or the provided Wrapper)
 
----
+
 
 ## Installation & Run
 
@@ -149,7 +149,7 @@ The server will start at:
 http://localhost:8080
 ```
 
----
+
 
 # Running Tests
 
@@ -163,7 +163,7 @@ Execute the full suite of unit and integration tests, including:
 ./gradlew test
 ```
 
----
+
 
 # Error Handling
 
@@ -175,7 +175,6 @@ The API utilizes a `GlobalExceptionHandler` to provide standardized and user-fri
 | `404 Not Found` | Requested optimization UUID does not exist |
 | `500 Internal Server Error` | Unexpected server-side exception |
 
----
 
 # Example Use Cases
 
@@ -185,7 +184,6 @@ The API utilizes a `GlobalExceptionHandler` to provide standardized and user-fri
 - Warehouse shipment planning
 - Fleet capacity management
 
----
 
 # Future Improvements
 
@@ -195,9 +193,3 @@ The API utilizes a `GlobalExceptionHandler` to provide standardized and user-fri
 - Docker containerization
 - Shipment prioritization rules
 - Multi-vehicle optimization
-
----
-
-# License
-
-This project is provided for educational and demonstration purposes.
