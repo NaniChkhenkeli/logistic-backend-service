@@ -1,9 +1,8 @@
 # vanOpt - Shipment Optimizer
 
-**vanOpt** is a high-performance RESTful API designed to solve the **Van Loading Problem**.  
-It uses a **0/1 Knapsack Algorithm** to determine the most profitable combination of shipments that can fit into a delivery vehicle with limited volume capacity.
+vanOpt is a high-performance RESTful API designed to solve the Van Loading Problem.  
+It uses a 0/1 Knapsack Algorithm to determine the most profitable combination of shipments that can fit into a delivery vehicle with limited volume capacity.
 
----
 
 # Features
 
