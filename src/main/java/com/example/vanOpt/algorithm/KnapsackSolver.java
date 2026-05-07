@@ -12,9 +12,11 @@ public class KnapsackSolver {
 
     private static final int REVENUE_SCALE = 100;
 
-
     public List<ShipmentRequest> solve(int maxVolume, List<ShipmentRequest> shipments) {
         int n = shipments.size();
+        if (n == 0 || maxVolume <= 0) {
+            return List.of();
+        }
 
         long[] rev = new long[n];
         for (int i = 0; i < n; i++) {
@@ -38,6 +40,7 @@ public class KnapsackSolver {
             }
         }
 
+        // traceback to find which items were selected
         List<ShipmentRequest> selected = new ArrayList<>();
         int remaining = maxVolume;
         for (int i = n; i > 0; i--) {

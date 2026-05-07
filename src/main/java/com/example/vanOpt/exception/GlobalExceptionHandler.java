@@ -3,6 +3,7 @@ package com.example.vanOpt.exception;
 import com.example.vanOpt.entity.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,9 +26,6 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(400, "Validation failed", details, Instant.now()));
     }
 
-    /**
-     * ტიპების შეუსაბამობის დამუშავება (მაგ. როცა UUID-ის ნაცვლად შემოდის "not-a-uuid")
-     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String message = String.format("Invalid value for parameter '%s'. Expected type: %s",
@@ -40,8 +38,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * როდესაც რესურსი არ მოიძებნა ბაზაში
+     * Handles malformed JSON bodies (e.g. non-UUID path variables matched via @PathVariable
+     * before type conversion, or completely unparseable request bodies).
      */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, "Malformed or unreadable request body", List.of(), Instant.now()));
+    }
+
     @ExceptionHandler(RequestNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(RequestNotFoundException ex) {
         return ResponseEntity
@@ -49,9 +55,6 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(404, ex.getMessage(), List.of(), Instant.now()));
     }
 
-    /**
-     * არავალიდური არგუმენტების დამუშავება
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadArg(IllegalArgumentException ex) {
         return ResponseEntity

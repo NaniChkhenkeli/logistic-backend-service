@@ -1,6 +1,5 @@
 package com.example.vanOpt.entity;
 
-
 import java.math.BigDecimal;
 
 public record ShipmentResponse(

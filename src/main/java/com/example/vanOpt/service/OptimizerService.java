@@ -27,7 +27,6 @@ public class OptimizerService {
 
     @Transactional
     public OptimizeResponse optimize(OptimizeRequest request) {
-        // ალგორითმის გამოძახება საუკეთესო კომბინაციის საპოვნელად
         List<ShipmentRequest> selected = solver.solve(request.maxVolume(), request.availableShipments());
 
         int totalVolume = selected.stream().mapToInt(ShipmentRequest::volume).sum();
@@ -55,7 +54,6 @@ public class OptimizerService {
 
     @Transactional(readOnly = true)
     public OptimizeResponse getById(UUID id) {
-        // id უკვე არის UUID ტიპის, რაც გამორიცხავს SQL შეცდომას
         return repository.findByIdWithShipments(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new RequestNotFoundException(id.toString()));
@@ -68,9 +66,6 @@ public class OptimizerService {
                 .toList();
     }
 
-    /**
-     * გარდაქმნის მონაცემთა ბაზის ობიექტს (Entity) საპასუხო DTO-დ
-     */
     private OptimizeResponse toResponse(OptimizationRequest entity) {
         List<ShipmentResponse> shipments = entity.getSelectedShipments().stream()
                 .map(s -> new ShipmentResponse(s.getName(), s.getVolume(), s.getRevenue()))

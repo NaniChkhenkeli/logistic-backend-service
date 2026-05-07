@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface OptimizationRequestRepository extends JpaRepository<OptimizationRequest, UUID> {
 
-    @Query("SELECT r FROM OptimizationRequest r LEFT JOIN FETCH r.selectedShipments")
+    @Query("SELECT r FROM OptimizationRequest r LEFT JOIN FETCH r.selectedShipments ORDER BY r.createdAt DESC")
     List<OptimizationRequest> findAllWithShipments();
 
     @Query("SELECT r FROM OptimizationRequest r LEFT JOIN FETCH r.selectedShipments WHERE r.id = :id")
