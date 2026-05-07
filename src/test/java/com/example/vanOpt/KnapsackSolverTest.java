@@ -18,6 +18,8 @@ class KnapsackSolverTest {
         return new ShipmentRequest(name, vol, BigDecimal.valueOf(rev));
     }
 
+
+
     @Test
     void shouldSelectOptimalShipmentsFromExample() {
         List<ShipmentRequest> shipments = List.of(
@@ -51,6 +53,28 @@ class KnapsackSolverTest {
 
         assertThat(result).isEmpty();
     }
+
+
+    @Test
+    void shouldHandleVerySmallRevenueDifferences() {
+        List<ShipmentRequest> shipments = List.of(
+                shipment("A", 5, 100.001),
+                shipment("B", 5, 100.009)
+        );
+
+        List<ShipmentRequest> result = solver.solve(5, shipments);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).name()).isEqualTo("B");
+    }
+
+    @Test
+    void shouldReturnEmptyWhenMaxVolumeIsZero() {
+        List<ShipmentRequest> shipments = List.of(shipment("A", 1, 100));
+        List<ShipmentRequest> result = solver.solve(0, shipments);
+        assertThat(result).isEmpty();
+    }
+
 
     @Test
     void shouldHandleSingleShipmentThatFitsExactly() {

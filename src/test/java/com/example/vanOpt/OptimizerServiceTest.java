@@ -111,6 +111,30 @@ class OptimizerServiceTest {
                 .hasMessageContaining(missingId.toString());
     }
 
+
+    @Test
+    void getAll_shouldReturnEmptyListWhenNoDataExists() {
+        when(repository.findAllWithShipments()).thenReturn(List.of());
+
+        List<OptimizeResponse> result = service.getAll();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getById_shouldMapSelectedShipmentsCorrectly() {
+        UUID id = UUID.randomUUID();
+        OptimizationRequest entity = buildEntity(id, 10, 500.0);
+        entity.addShipment(new SelectedShipment("Item 1", 10, BigDecimal.valueOf(500.0)));
+
+        when(repository.findByIdWithShipments(id)).thenReturn(Optional.of(entity));
+
+        OptimizeResponse response = service.getById(id);
+
+        assertThat(response.selectedShipments()).hasSize(1);
+        assertThat(response.selectedShipments().get(0).name()).isEqualTo("Item 1");
+    }
+
     @Test
     void getAll_shouldReturnMappedList() {
         UUID id1 = UUID.randomUUID();

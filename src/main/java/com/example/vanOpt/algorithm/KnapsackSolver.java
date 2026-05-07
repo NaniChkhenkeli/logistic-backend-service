@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class KnapsackSolver {
 
-    private static final int REVENUE_SCALE = 100;
+    private static final int REVENUE_SCALE = 1000;
 
     public List<ShipmentRequest> solve(int maxVolume, List<ShipmentRequest> shipments) {
         int n = shipments.size();
