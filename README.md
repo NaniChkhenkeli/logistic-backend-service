@@ -33,3 +33,35 @@ Calculate the best shipment combination and persist it to the database.
     { "name": "Parcel C", "volume": 3, "revenue": 80.00 }
   ]
 }
+
+
+## 2. List History
+
+Retrieve all past optimization results, ordered by the most recent.
+
+- **URL:** `GET /api/optimize`
+
+---
+
+## 3. Get Specific Result
+
+Retrieve a specific optimization by its UUID.
+
+- **URL:** `GET /api/optimize/{id}`
+
+---
+
+# How It Works
+
+The core optimization is handled by the `KnapsackSolver`.
+
+To maintain speed and precision:
+
+- Converts `BigDecimal` revenues into scaled `long` values.
+- Uses a **Bottom-Up Dynamic Programming** approach to determine the maximum possible revenue for the given `maxVolume`.
+- Performs a traceback on the DP table to identify which items belong to the optimal solution.
+
+The algorithm follows the recurrence relation:
+
+```math
+dp[i][v] = \max(dp[i-1][v],\ revenue_i + dp[i-1][v - volume_i])
