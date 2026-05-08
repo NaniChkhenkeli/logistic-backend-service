@@ -1,4 +1,4 @@
-# VanOpt — Van Loading Optimiser
+# VanOpt - Van Loading Optimiser
 
 A Spring Boot REST API that selects the revenue-maximising combination of shipments for a delivery van using a 0/1 Knapsack dynamic-programming algorithm. Every optimisation run is persisted to PostgreSQL so the operations team can audit past decisions.
 
